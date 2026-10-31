@@ -141,7 +141,8 @@ class Brain:
                     "pending": asdict(run.pending_confirmation) if run.pending_confirmation else None}
         except (LLMError, OSError) as e:
             reply = self.rules(message, sid)
-            reply["reply"] += f"\n\n(local model unavailable: {e}; used built-in commands)"
+            reason = type(e).__name__ if not isinstance(e, LLMError) else str(e).split(":")[0]
+            reply["reply"] += f"\n\n(local model offline — {reason}; answered with built-in commands)"
             return reply
 
     def _system(self) -> str:
@@ -199,7 +200,15 @@ class Brain:
                 return {"session_id": sid, "reply": res["instructions"] if res["status"] == "running"
                         else f"Environment {res['name']} is {res['status']}: {res['message']}", "steps": [], "source": "rules"}
             if "status" in msg or "deploy" in msg:
-                return {"session_id": sid, "reply": _fmt(self.tools()[5].handler({})), "steps": [], "source": "rules"}
+                rows = self.tools()[5].handler({})
+                text = "\n".join(
+                    f"#{r['id']} {r['app']}/{r['component']} -> {r['env']}: {r['status']}"
+                    + (f" (risk {r['risk']})" if r["risk"] else "") + (f" - {r['error']}" if r["error"] else "")
+                    for r in rows) or "You have no deploy requests yet."
+                envs = [f"{e.name}: {e.status}" for e in a.envs.list()]
+                if envs:
+                    text += "\nTest environments: " + ", ".join(envs)
+                return {"session_id": sid, "reply": text, "steps": [], "source": "rules"}
         except AgentError as e:
             return {"session_id": sid, "reply": str(e), "steps": [], "source": "rules"}
         return {"session_id": sid, "source": "rules", "steps": [],

@@ -119,6 +119,11 @@ def create_app(agent: LocalAgent | None = None, *, background: bool = True) -> F
         return job_id
 
     # ---------------------------------------------------------------- status
+    @app.get("/api/ping")
+    def ping() -> dict[str, Any]:
+        """Cheap liveness probe (the UI uses it to detect developer mode)."""
+        return {"ok": True, "service": "devops-local-agent", "version": __version__}
+
     @app.get("/api/status")
     def status() -> dict[str, Any]:
         out = agent.status()

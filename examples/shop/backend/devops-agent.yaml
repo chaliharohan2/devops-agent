@@ -1,0 +1,41 @@
+# Component manifest read by the DevOps Agent fleet (see docs/MANIFEST_SPEC.md)
+version: 1
+app: shop
+component:
+  name: backend
+  kind: backend
+  language: python
+  framework: fastapi
+  app_module: app.main:app
+  port: 8000
+  build:
+    dockerfile: Dockerfile
+  dev:
+    # used when this is the developer's own code in a test environment
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    mount: /app
+  healthcheck:
+    path: /health
+  migrations:
+    command: alembic upgrade head
+  depends_on: [postgres]
+  env:
+    DATABASE_URL:
+      description: SQLAlchemy database URL
+      required: true
+      local: postgresql+psycopg://shop:shop@${services.postgres.host}:5432/shop
+    CORS_ORIGINS:
+      description: Comma separated origins allowed to call the API
+      default: "*"
+      local: ${components.frontend.external_url}
+    APP_NAME:
+      default: Shop API
+  config:
+    env_files: [.env.example]
+    settings_modules: [app/settings.py]
+  services:
+    postgres:
+      image: postgres:16-alpine
+      env: {POSTGRES_USER: shop, POSTGRES_PASSWORD: shop, POSTGRES_DB: shop}
+      port: 5432
+      healthcheck: pg_isready -U shop -d shop

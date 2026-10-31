@@ -290,3 +290,15 @@ def test_daemon_csrf_guard_and_status(world) -> None:
     assert r.status_code == 200 and "shop/backend" in r.json()
     assert c.post("/api/changes/analyze", json={"app": "shop", "component": "nope", "environment": "dev"},
                   headers={"X-DevOps-Agent": "1"}).status_code == 400
+
+
+def test_already_merged_branch_is_nothing_to_deploy(world) -> None:
+    agent = world.agent_for("alice")
+    agent.auto_link()
+    repo = agent.cfg.repo_for("shop", "backend")
+    git(repo, "checkout", "-q", "-b", "feature/empty")
+    git(repo, "push", "-q", "-u", "origin", "feature/empty")
+    res = agent.analyze("shop", "backend", "dev")
+    assert any("Nothing to deploy" in p for p in res["preflight"]["problems"])
+    with pytest.raises(AgentError, match="Nothing to deploy"):
+        agent.deploy("shop", "backend", "dev")

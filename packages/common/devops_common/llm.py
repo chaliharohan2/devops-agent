@@ -118,7 +118,10 @@ class LLMClient:
         headers = {"Content-Type": "application/json"}
         if api_key:
             headers["Authorization"] = f"Bearer {api_key}"
-        self._http = httpx.Client(timeout=timeout, headers=headers, transport=transport)
+        # Fail fast when the endpoint is unreachable (callers fall back to deterministic
+        # behaviour) but allow long generations once connected.
+        self._http = httpx.Client(timeout=httpx.Timeout(timeout, connect=min(10.0, timeout)), headers=headers,
+                                  transport=transport)
 
     def close(self) -> None:
         self._http.close()

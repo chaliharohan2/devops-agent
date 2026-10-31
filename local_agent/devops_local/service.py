@@ -146,6 +146,9 @@ class LocalAgent:
         comp = next((c for c in self._app(app)["components"] if c["name"] == component), {})
         report = changes.analyze(repo, app=app, component=component, branch=pf.branch or "", target_branch=target,
                                  server_manifest=comp.get("manifest"), repo_url=comp.get("repo_url"))
+        if not report.commits:
+            out["preflight"]["problems"].append(
+                f"Nothing to deploy: {pf.branch} has no commits that are not already in {target}.")
         out["report"] = report.model_dump(mode="json")
         out["values_needed"] = changes.values_needed(report)
         return out
