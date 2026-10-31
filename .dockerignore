@@ -1,0 +1,10 @@
+.git
+.venv
+**/node_modules
+web/dist
+.demo
+.devops-agent
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+docs/images

@@ -1,0 +1,49 @@
+# Run the server agent stack:
+#   cp deploy/.env.example deploy/.env   # fill in secrets + vLLM endpoint
+#   docker compose -f deploy/docker-compose.yml --env-file deploy/.env up -d --build
+name: devops-agent
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: devops
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: devops_agent
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devops -d devops_agent"]
+      interval: 5s
+      retries: 20
+    restart: unless-stopped
+
+  server:
+    build:
+      context: ..
+      dockerfile: deploy/server.Dockerfile
+    image: devops-agent-server:latest
+    environment:
+      DATABASE_URL: postgresql+psycopg://devops:${POSTGRES_PASSWORD}@postgres:5432/devops_agent
+      VLLM_BASE_URL: ${VLLM_BASE_URL:-}
+      VLLM_API_KEY: ${VLLM_API_KEY:-}
+      VLLM_MODEL: ${VLLM_MODEL:-}
+      # Generate with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+      DEVOPS_SECRET_KEY: "${DEVOPS_SECRET_KEY:?set DEVOPS_SECRET_KEY (see deploy/.env.example)}"
+      DEVOPS_BOOTSTRAP_ADMIN_TOKEN: ${DEVOPS_BOOTSTRAP_ADMIN_TOKEN:-}
+      DEVOPS_DEFAULT_DEPLOY_TARGET: ${DEVOPS_DEFAULT_DEPLOY_TARGET:-compose}
+      DEVOPS_CORS_ORIGINS: '["http://localhost:8080"]'
+      # Git credentials for private remotes: mount an SSH key / .git-credentials, or use https URLs with tokens.
+    volumes:
+      - server-data:/data
+      # Needed only for the `compose` deploy target (deploys to this Docker host).
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata: {}
+  server-data: {}

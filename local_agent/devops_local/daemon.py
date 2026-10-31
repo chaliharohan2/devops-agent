@@ -257,7 +257,26 @@ def create_app(agent: LocalAgent | None = None, *, background: bool = True) -> F
 
         threading.Thread(target=poll, daemon=True, name="inbox-poller").start()
 
-    ui = Path(__file__).resolve().parents[2] / "web" / "dist"
-    if ui.is_dir():
+    ui = find_ui_dir()
+    if ui is not None:
         app.mount("/", StaticFiles(directory=ui, html=True), name="ui")
+    else:
+        log.warning("web UI not found; set DEVOPS_AGENT_UI_DIR to a built web/dist directory")
     return app
+
+
+def find_ui_dir() -> Path | None:
+    """Built UI location: $DEVOPS_AGENT_UI_DIR, ~/.devops-agent/ui, or web/dist in a source checkout."""
+    import os
+
+    from .config import agent_home
+
+    candidates = [
+        os.environ.get("DEVOPS_AGENT_UI_DIR"),
+        str(agent_home() / "ui"),
+        str(Path(__file__).resolve().parents[2] / "web" / "dist"),
+    ]
+    for c in candidates:
+        if c and (Path(c) / "index.html").is_file():
+            return Path(c)
+    return None

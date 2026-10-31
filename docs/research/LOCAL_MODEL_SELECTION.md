@@ -95,6 +95,10 @@ Risks and mitigations:
 * `devops-agent model pull` also creates a tuned alias **`devops-agent-slm`** with `num_ctx=16384`,
   `temperature=0.2`, so switching models never touches the agent config beyond `llm.source`.
 
+Model sources in the catalog (`devops_local/hardware.py`): the Ornith repo (`ornith-ai/Ornith-1.5-9B-GGUF`) and
+`unsloth/gemma-4-12b-it-GGUF` were confirmed during research; the Gemma 4 E4B path follows Unsloth's naming and
+should be confirmed by the first `devops-agent model pull gemma-4-e4b` in the acceptance test (§6).
+
 Any other OpenAI‑compatible server (llama.cpp `llama-server`, LM Studio) works by editing
 `~/.devops-agent/config.yaml` → `llm.base_url` / `llm.model`.
 
