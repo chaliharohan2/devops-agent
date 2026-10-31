@@ -1,0 +1,4404 @@
+{
+  "components": {
+    "schemas": {
+      "AgentOut": {
+        "properties": {
+          "capabilities": {
+            "additionalProperties": true,
+            "title": "Capabilities",
+            "type": "object"
+          },
+          "hostname": {
+            "title": "Hostname",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "last_seen_at": {
+            "format": "date-time",
+            "title": "Last Seen At",
+            "type": "string"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "online": {
+            "title": "Online",
+            "type": "boolean"
+          },
+          "username": {
+            "title": "Username",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "hostname",
+          "version",
+          "model",
+          "capabilities",
+          "last_seen_at",
+          "online"
+        ],
+        "title": "AgentOut",
+        "type": "object"
+      },
+      "AgentRegistered": {
+        "properties": {
+          "agent_id": {
+            "title": "Agent Id",
+            "type": "integer"
+          },
+          "agent_token": {
+            "title": "Agent Token",
+            "type": "string"
+          },
+          "username": {
+            "title": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id",
+          "agent_token",
+          "username"
+        ],
+        "title": "AgentRegistered",
+        "type": "object"
+      },
+      "AgentRegistration": {
+        "properties": {
+          "capabilities": {
+            "additionalProperties": true,
+            "title": "Capabilities",
+            "type": "object"
+          },
+          "hostname": {
+            "title": "Hostname",
+            "type": "string"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "hostname",
+          "version"
+        ],
+        "title": "AgentRegistration",
+        "type": "object"
+      },
+      "AppIn": {
+        "properties": {
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/ComponentIn"
+            },
+            "title": "Components",
+            "type": "array"
+          },
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "environments": {
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentIn"
+            },
+            "title": "Environments",
+            "type": "array"
+          },
+          "name": {
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "AppIn",
+        "type": "object"
+      },
+      "AppOut": {
+        "properties": {
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/ComponentOut"
+            },
+            "title": "Components",
+            "type": "array"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "environments": {
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentOut"
+            },
+            "title": "Environments",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "components",
+          "environments"
+        ],
+        "title": "AppOut",
+        "type": "object"
+      },
+      "ApproveIn": {
+        "properties": {
+          "override_missing": {
+            "default": false,
+            "title": "Override Missing",
+            "type": "boolean"
+          }
+        },
+        "title": "ApproveIn",
+        "type": "object"
+      },
+      "AuditOut": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "actor": {
+            "title": "Actor",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "subject_id": {
+            "title": "Subject Id",
+            "type": "string"
+          },
+          "subject_type": {
+            "title": "Subject Type",
+            "type": "string"
+          },
+          "ts": {
+            "format": "date-time",
+            "title": "Ts",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "ts",
+          "actor",
+          "action",
+          "subject_type",
+          "subject_id",
+          "details"
+        ],
+        "title": "AuditOut",
+        "type": "object"
+      },
+      "ChangeReport": {
+        "description": "Deterministic description of what a branch changes relative to its target.",
+        "properties": {
+          "analyzer_version": {
+            "default": "1",
+            "title": "Analyzer Version",
+            "type": "string"
+          },
+          "app": {
+            "title": "App",
+            "type": "string"
+          },
+          "base_sha": {
+            "title": "Base Sha",
+            "type": "string"
+          },
+          "changed_files": {
+            "items": {
+              "$ref": "#/components/schemas/FileChange"
+            },
+            "title": "Changed Files",
+            "type": "array"
+          },
+          "commits": {
+            "items": {
+              "$ref": "#/components/schemas/CommitInfo"
+            },
+            "title": "Commits",
+            "type": "array"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "config_changes": {
+            "items": {
+              "$ref": "#/components/schemas/ConfigChange"
+            },
+            "title": "Config Changes",
+            "type": "array"
+          },
+          "head_sha": {
+            "title": "Head Sha",
+            "type": "string"
+          },
+          "repo_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repo Url"
+          },
+          "requires_migration": {
+            "default": false,
+            "title": "Requires Migration",
+            "type": "boolean"
+          },
+          "requires_rebuild": {
+            "default": false,
+            "title": "Requires Rebuild",
+            "type": "boolean"
+          },
+          "source_branch": {
+            "title": "Source Branch",
+            "type": "string"
+          },
+          "summary": {
+            "default": "",
+            "title": "Summary",
+            "type": "string"
+          },
+          "target_branch": {
+            "title": "Target Branch",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "app",
+          "component",
+          "source_branch",
+          "target_branch",
+          "base_sha",
+          "head_sha"
+        ],
+        "title": "ChangeReport",
+        "type": "object"
+      },
+      "ChangeRequestStatus": {
+        "enum": [
+          "received",
+          "analyzing",
+          "awaiting_approval",
+          "approved",
+          "merging",
+          "merged",
+          "deploying",
+          "deployed",
+          "rejected",
+          "conflict",
+          "failed"
+        ],
+        "title": "ChangeRequestStatus",
+        "type": "string"
+      },
+      "ChangeRequestView": {
+        "properties": {
+          "app": {
+            "title": "App",
+            "type": "string"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "config_keys": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Config Keys",
+            "type": "array"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "deployment_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deployment Id"
+          },
+          "discrepancies": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Discrepancies",
+            "type": "array"
+          },
+          "environment": {
+            "title": "Environment",
+            "type": "string"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "head_sha": {
+            "title": "Head Sha",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "merge_sha": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Merge Sha"
+          },
+          "requested_by": {
+            "title": "Requested By",
+            "type": "string"
+          },
+          "review": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReviewResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "risk_level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RiskLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source_branch": {
+            "title": "Source Branch",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ChangeRequestStatus"
+          },
+          "target_branch": {
+            "title": "Target Branch",
+            "type": "string"
+          },
+          "timeline": {
+            "items": {
+              "$ref": "#/components/schemas/TimelineEntry"
+            },
+            "title": "Timeline",
+            "type": "array"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "app",
+          "component",
+          "environment",
+          "source_branch",
+          "target_branch",
+          "head_sha",
+          "status",
+          "requested_by",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ChangeRequestView",
+        "type": "object"
+      },
+      "ChatIn": {
+        "properties": {
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/ChatMessage"
+            },
+            "maxItems": 40,
+            "minItems": 1,
+            "title": "Messages",
+            "type": "array"
+          }
+        },
+        "required": [
+          "messages"
+        ],
+        "title": "ChatIn",
+        "type": "object"
+      },
+      "ChatMessage": {
+        "properties": {
+          "content": {
+            "maxLength": 8000,
+            "title": "Content",
+            "type": "string"
+          },
+          "role": {
+            "pattern": "^(user|assistant)$",
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "content"
+        ],
+        "title": "ChatMessage",
+        "type": "object"
+      },
+      "ChatOut": {
+        "properties": {
+          "reply": {
+            "title": "Reply",
+            "type": "string"
+          },
+          "steps": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Steps",
+            "type": "array"
+          }
+        },
+        "required": [
+          "reply"
+        ],
+        "title": "ChatOut",
+        "type": "object"
+      },
+      "CommitInfo": {
+        "properties": {
+          "author": {
+            "title": "Author",
+            "type": "string"
+          },
+          "date": {
+            "default": "",
+            "title": "Date",
+            "type": "string"
+          },
+          "email": {
+            "default": "",
+            "title": "Email",
+            "type": "string"
+          },
+          "sha": {
+            "title": "Sha",
+            "type": "string"
+          },
+          "subject": {
+            "title": "Subject",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sha",
+          "author",
+          "subject"
+        ],
+        "title": "CommitInfo",
+        "type": "object"
+      },
+      "ComponentIn": {
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/ComponentKind",
+            "default": "other"
+          },
+          "manifest": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Manifest"
+          },
+          "name": {
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+            "title": "Name",
+            "type": "string"
+          },
+          "path": {
+            "default": ".",
+            "title": "Path",
+            "type": "string"
+          },
+          "repo_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repo Url"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "ComponentIn",
+        "type": "object"
+      },
+      "ComponentKind": {
+        "enum": [
+          "frontend",
+          "backend",
+          "worker",
+          "database",
+          "cache",
+          "other"
+        ],
+        "title": "ComponentKind",
+        "type": "string"
+      },
+      "ComponentOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "manifest": {
+            "additionalProperties": true,
+            "title": "Manifest",
+            "type": "object"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "repo_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repo Url"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "repo_url",
+          "path",
+          "manifest"
+        ],
+        "title": "ComponentOut",
+        "type": "object"
+      },
+      "ComponentRuntimeSpec": {
+        "properties": {
+          "env": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Env",
+            "type": "object"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ComponentKind",
+            "default": "other"
+          },
+          "manifest": {
+            "additionalProperties": true,
+            "title": "Manifest",
+            "type": "object"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "ref": {
+            "title": "Ref",
+            "type": "string"
+          },
+          "repo_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repo Url"
+          },
+          "secret_keys": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Secret Keys",
+            "type": "array"
+          },
+          "sha": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sha"
+          }
+        },
+        "required": [
+          "name",
+          "ref"
+        ],
+        "title": "ComponentRuntimeSpec",
+        "type": "object"
+      },
+      "ConfigChange": {
+        "properties": {
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "default_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Value"
+          },
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "is_secret_hint": {
+            "default": false,
+            "title": "Is Secret Hint",
+            "type": "boolean"
+          },
+          "key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Key"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ConfigChangeKind"
+          },
+          "requires_value": {
+            "default": false,
+            "title": "Requires Value",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "kind",
+          "component"
+        ],
+        "title": "ConfigChange",
+        "type": "object"
+      },
+      "ConfigChangeKind": {
+        "enum": [
+          "env_var_added",
+          "env_var_removed",
+          "config_file_changed",
+          "dependency_changed",
+          "migration_added",
+          "build_changed",
+          "manifest_changed"
+        ],
+        "title": "ConfigChangeKind",
+        "type": "string"
+      },
+      "ConfigDelete": {
+        "properties": {
+          "component": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Component"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key"
+        ],
+        "title": "ConfigDelete",
+        "type": "object"
+      },
+      "ConfigEntryOut": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "is_secret": {
+            "title": "Is Secret",
+            "type": "boolean"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "scope": {
+            "title": "Scope",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "updated_by": {
+            "title": "Updated By",
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "scope",
+          "key",
+          "value",
+          "is_secret",
+          "description",
+          "version",
+          "updated_by",
+          "updated_at"
+        ],
+        "title": "ConfigEntryOut",
+        "type": "object"
+      },
+      "ConfigRevisionOut": {
+        "properties": {
+          "actor": {
+            "title": "Actor",
+            "type": "string"
+          },
+          "change_request_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change Request Id"
+          },
+          "changes": {
+            "items": {},
+            "title": "Changes",
+            "type": "array"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "actor",
+          "message",
+          "change_request_id",
+          "changes",
+          "created_at"
+        ],
+        "title": "ConfigRevisionOut",
+        "type": "object"
+      },
+      "ConfigUpdate": {
+        "properties": {
+          "deletes": {
+            "items": {
+              "$ref": "#/components/schemas/ConfigDelete"
+            },
+            "title": "Deletes",
+            "type": "array"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/ConfigValue"
+            },
+            "title": "Values",
+            "type": "array"
+          }
+        },
+        "title": "ConfigUpdate",
+        "type": "object"
+      },
+      "ConfigValue": {
+        "properties": {
+          "component": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Component"
+          },
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "is_secret": {
+            "default": false,
+            "title": "Is Secret",
+            "type": "boolean"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "key"
+        ],
+        "title": "ConfigValue",
+        "type": "object"
+      },
+      "DeployIn": {
+        "properties": {
+          "component_shas": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Component Shas",
+            "type": "object"
+          }
+        },
+        "title": "DeployIn",
+        "type": "object"
+      },
+      "DeployRequest": {
+        "description": "Sent by a local agent: \"please merge this pushed branch and update these configs\".",
+        "properties": {
+          "app": {
+            "title": "App",
+            "type": "string"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "config_values": {
+            "items": {
+              "$ref": "#/components/schemas/ConfigValue"
+            },
+            "title": "Config Values",
+            "type": "array"
+          },
+          "environment": {
+            "title": "Environment",
+            "type": "string"
+          },
+          "head_sha": {
+            "title": "Head Sha",
+            "type": "string"
+          },
+          "notes": {
+            "default": "",
+            "title": "Notes",
+            "type": "string"
+          },
+          "protocol_version": {
+            "default": "1",
+            "title": "Protocol Version",
+            "type": "string"
+          },
+          "report": {
+            "$ref": "#/components/schemas/ChangeReport"
+          },
+          "source_branch": {
+            "title": "Source Branch",
+            "type": "string"
+          }
+        },
+        "required": [
+          "app",
+          "component",
+          "environment",
+          "source_branch",
+          "head_sha",
+          "report"
+        ],
+        "title": "DeployRequest",
+        "type": "object"
+      },
+      "DeploymentOut": {
+        "properties": {
+          "app": {
+            "title": "App",
+            "type": "string"
+          },
+          "change_request_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change Request Id"
+          },
+          "component_shas": {
+            "additionalProperties": true,
+            "title": "Component Shas",
+            "type": "object"
+          },
+          "config_version": {
+            "title": "Config Version",
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "diagnosis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Diagnosis"
+          },
+          "environment": {
+            "title": "Environment",
+            "type": "string"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "log": {
+            "title": "Log",
+            "type": "string"
+          },
+          "plan": {
+            "additionalProperties": true,
+            "title": "Plan",
+            "type": "object"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "target": {
+            "title": "Target",
+            "type": "string"
+          },
+          "triggered_by": {
+            "title": "Triggered By",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "app",
+          "environment",
+          "change_request_id",
+          "status",
+          "target",
+          "component_shas",
+          "config_version",
+          "plan",
+          "log",
+          "diagnosis",
+          "triggered_by",
+          "created_at",
+          "started_at",
+          "finished_at"
+        ],
+        "title": "DeploymentOut",
+        "type": "object"
+      },
+      "EnvironmentIn": {
+        "properties": {
+          "auto_deploy": {
+            "default": true,
+            "title": "Auto Deploy",
+            "type": "boolean"
+          },
+          "branch": {
+            "default": "main",
+            "title": "Branch",
+            "type": "string"
+          },
+          "branch_overrides": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Branch Overrides",
+            "type": "object"
+          },
+          "deploy_target": {
+            "additionalProperties": true,
+            "title": "Deploy Target",
+            "type": "object"
+          },
+          "name": {
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+            "title": "Name",
+            "type": "string"
+          },
+          "requires_approval": {
+            "default": false,
+            "title": "Requires Approval",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "EnvironmentIn",
+        "type": "object"
+      },
+      "EnvironmentOut": {
+        "properties": {
+          "auto_deploy": {
+            "title": "Auto Deploy",
+            "type": "boolean"
+          },
+          "branch": {
+            "title": "Branch",
+            "type": "string"
+          },
+          "branch_overrides": {
+            "additionalProperties": true,
+            "title": "Branch Overrides",
+            "type": "object"
+          },
+          "config_version": {
+            "title": "Config Version",
+            "type": "integer"
+          },
+          "deploy_target": {
+            "additionalProperties": true,
+            "title": "Deploy Target",
+            "type": "object"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "requires_approval": {
+            "title": "Requires Approval",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "branch",
+          "branch_overrides",
+          "requires_approval",
+          "auto_deploy",
+          "deploy_target",
+          "config_version"
+        ],
+        "title": "EnvironmentOut",
+        "type": "object"
+      },
+      "EnvironmentSpec": {
+        "properties": {
+          "app": {
+            "title": "App",
+            "type": "string"
+          },
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/ComponentRuntimeSpec"
+            },
+            "title": "Components",
+            "type": "array"
+          },
+          "config_version": {
+            "default": 0,
+            "title": "Config Version",
+            "type": "integer"
+          },
+          "environment": {
+            "title": "Environment",
+            "type": "string"
+          },
+          "generated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generated At"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Notes",
+            "type": "array"
+          },
+          "services": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceSpec"
+            },
+            "title": "Services",
+            "type": "array"
+          }
+        },
+        "required": [
+          "app",
+          "environment"
+        ],
+        "title": "EnvironmentSpec",
+        "type": "object"
+      },
+      "Evidence": {
+        "description": "Where in the diff a finding came from (so humans and LLMs can verify it).",
+        "properties": {
+          "file": {
+            "title": "File",
+            "type": "string"
+          },
+          "line": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line"
+          },
+          "snippet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snippet"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Evidence",
+        "type": "object"
+      },
+      "FileChange": {
+        "properties": {
+          "additions": {
+            "default": 0,
+            "title": "Additions",
+            "type": "integer"
+          },
+          "deletions": {
+            "default": 0,
+            "title": "Deletions",
+            "type": "integer"
+          },
+          "old_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Old Path"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "status"
+        ],
+        "title": "FileChange",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "ImportRepoIn": {
+        "properties": {
+          "branch": {
+            "default": "main",
+            "title": "Branch",
+            "type": "string"
+          },
+          "repo_url": {
+            "title": "Repo Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "repo_url"
+        ],
+        "title": "ImportRepoIn",
+        "type": "object"
+      },
+      "InboxEvent": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "title": "Payload",
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "created_at"
+        ],
+        "title": "InboxEvent",
+        "type": "object"
+      },
+      "PeerRequestCreate": {
+        "properties": {
+          "app": {
+            "title": "App",
+            "type": "string"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ref"
+          },
+          "share": {
+            "$ref": "#/components/schemas/PeerShareKind",
+            "default": "branch"
+          },
+          "to_user": {
+            "title": "To User",
+            "type": "string"
+          }
+        },
+        "required": [
+          "app",
+          "component",
+          "to_user"
+        ],
+        "title": "PeerRequestCreate",
+        "type": "object"
+      },
+      "PeerRequestStatus": {
+        "enum": [
+          "pending",
+          "approved",
+          "denied",
+          "uploaded",
+          "fetched",
+          "expired"
+        ],
+        "title": "PeerRequestStatus",
+        "type": "string"
+      },
+      "PeerRequestView": {
+        "properties": {
+          "app": {
+            "title": "App",
+            "type": "string"
+          },
+          "artifact_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artifact Sha256"
+          },
+          "artifact_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artifact Size"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "from_user": {
+            "title": "From User",
+            "type": "string"
+          },
+          "head_sha": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Head Sha"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ref"
+          },
+          "share": {
+            "$ref": "#/components/schemas/PeerShareKind"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PeerRequestStatus"
+          },
+          "to_user": {
+            "title": "To User",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "app",
+          "component",
+          "from_user",
+          "to_user",
+          "share",
+          "status",
+          "created_at"
+        ],
+        "title": "PeerRequestView",
+        "type": "object"
+      },
+      "PeerShareKind": {
+        "enum": [
+          "branch",
+          "working_tree"
+        ],
+        "title": "PeerShareKind",
+        "type": "string"
+      },
+      "RejectIn": {
+        "properties": {
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "RejectIn",
+        "type": "object"
+      },
+      "ReviewResult": {
+        "description": "Server agent's review of a change request (LLM-produced, schema-validated).",
+        "properties": {
+          "concerns": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Concerns",
+            "type": "array"
+          },
+          "deployment_steps": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Deployment Steps",
+            "type": "array"
+          },
+          "missing_config": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing Config",
+            "type": "array"
+          },
+          "risk_level": {
+            "$ref": "#/components/schemas/RiskLevel",
+            "default": "medium"
+          },
+          "source": {
+            "default": "deterministic",
+            "title": "Source",
+            "type": "string"
+          },
+          "summary": {
+            "default": "",
+            "title": "Summary",
+            "type": "string"
+          }
+        },
+        "title": "ReviewResult",
+        "type": "object"
+      },
+      "RiskLevel": {
+        "enum": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "title": "RiskLevel",
+        "type": "string"
+      },
+      "ServiceSpec": {
+        "description": "Infrastructure dependency (postgres, redis, ...) run from a stock image.",
+        "properties": {
+          "env": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Env",
+            "type": "object"
+          },
+          "healthcheck": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Healthcheck"
+          },
+          "image": {
+            "title": "Image",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "port": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Port"
+          },
+          "volumes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Volumes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "image"
+        ],
+        "title": "ServiceSpec",
+        "type": "object"
+      },
+      "TimelineEntry": {
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "at",
+          "status"
+        ],
+        "title": "TimelineEntry",
+        "type": "object"
+      },
+      "TokenOut": {
+        "properties": {
+          "note": {
+            "default": "Store this token now; it cannot be shown again.",
+            "title": "Note",
+            "type": "string"
+          },
+          "token": {
+            "title": "Token",
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserOut"
+          }
+        },
+        "required": [
+          "user",
+          "token"
+        ],
+        "title": "TokenOut",
+        "type": "object"
+      },
+      "UserCreate": {
+        "properties": {
+          "display_name": {
+            "default": "",
+            "title": "Display Name",
+            "type": "string"
+          },
+          "role": {
+            "default": "developer",
+            "pattern": "^(developer|maintainer|admin)$",
+            "title": "Role",
+            "type": "string"
+          },
+          "username": {
+            "pattern": "^[a-z0-9][a-z0-9._-]{1,63}$",
+            "title": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "username"
+        ],
+        "title": "UserCreate",
+        "type": "object"
+      },
+      "UserOut": {
+        "properties": {
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          },
+          "username": {
+            "title": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "display_name",
+          "role",
+          "active"
+        ],
+        "title": "UserOut",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Merges pushed branches, owns environment configuration, runs deployments and serves environment specs to developer agents.",
+    "title": "DevOps Agent \u2014 Server Agent",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/agent/chat": {
+      "post": {
+        "operationId": "chat_api_v1_agent_chat_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Chat",
+        "tags": [
+          "agent"
+        ]
+      }
+    },
+    "/api/v1/agents": {
+      "get": {
+        "operationId": "list_agents_api_v1_agents_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AgentOut"
+                  },
+                  "title": "Response List Agents Api V1 Agents Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Agents",
+        "tags": [
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/heartbeat": {
+      "post": {
+        "operationId": "heartbeat_api_v1_agents_heartbeat_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/AgentRegistration"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Heartbeat Api V1 Agents Heartbeat Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Heartbeat",
+        "tags": [
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/inbox": {
+      "get": {
+        "operationId": "inbox_api_v1_agents_inbox_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "title": "After",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/InboxEvent"
+                  },
+                  "title": "Response Inbox Api V1 Agents Inbox Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Inbox",
+        "tags": [
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/agents/register": {
+      "post": {
+        "operationId": "register_agent_api_v1_agents_register_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRegistration"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRegistered"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Register Agent",
+        "tags": [
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/apps": {
+      "get": {
+        "operationId": "list_apps_api_v1_apps_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AppOut"
+                  },
+                  "title": "Response List Apps Api V1 Apps Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Apps",
+        "tags": [
+          "apps"
+        ]
+      },
+      "post": {
+        "operationId": "create_app_api_v1_apps_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create App",
+        "tags": [
+          "apps"
+        ]
+      }
+    },
+    "/api/v1/apps/{app_name}": {
+      "get": {
+        "operationId": "get_app_api_v1_apps__app_name__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app_name",
+            "required": true,
+            "schema": {
+              "title": "App Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get App",
+        "tags": [
+          "apps"
+        ]
+      }
+    },
+    "/api/v1/apps/{app_name}/components": {
+      "post": {
+        "operationId": "add_component_api_v1_apps__app_name__components_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app_name",
+            "required": true,
+            "schema": {
+              "title": "App Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComponentIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComponentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Component",
+        "tags": [
+          "apps"
+        ]
+      }
+    },
+    "/api/v1/apps/{app_name}/components/import": {
+      "post": {
+        "description": "Register every component declared by a repo's ``devops-agent.yaml``.",
+        "operationId": "import_repo_api_v1_apps__app_name__components_import_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app_name",
+            "required": true,
+            "schema": {
+              "title": "App Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportRepoIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ComponentOut"
+                  },
+                  "title": "Response Import Repo Api V1 Apps  App Name  Components Import Post",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Import Repo",
+        "tags": [
+          "apps"
+        ]
+      }
+    },
+    "/api/v1/apps/{app_name}/environments": {
+      "post": {
+        "operationId": "add_environment_api_v1_apps__app_name__environments_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app_name",
+            "required": true,
+            "schema": {
+              "title": "App Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnvironmentIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvironmentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Environment",
+        "tags": [
+          "apps"
+        ]
+      }
+    },
+    "/api/v1/apps/{app_name}/environments/{env_name}": {
+      "patch": {
+        "operationId": "update_environment_api_v1_apps__app_name__environments__env_name__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app_name",
+            "required": true,
+            "schema": {
+              "title": "App Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "env_name",
+            "required": true,
+            "schema": {
+              "title": "Env Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvironmentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Environment",
+        "tags": [
+          "apps"
+        ]
+      }
+    },
+    "/api/v1/apps/{app_name}/environments/{env_name}/configs": {
+      "get": {
+        "operationId": "list_configs_api_v1_apps__app_name__environments__env_name__configs_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app_name",
+            "required": true,
+            "schema": {
+              "title": "App Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "env_name",
+            "required": true,
+            "schema": {
+              "title": "Env Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ConfigEntryOut"
+                  },
+                  "title": "Response List Configs Api V1 Apps  App Name  Environments  Env Name  Configs Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Configs",
+        "tags": [
+          "apps",
+          "configs"
+        ]
+      },
+      "put": {
+        "operationId": "update_configs_api_v1_apps__app_name__environments__env_name__configs_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app_name",
+            "required": true,
+            "schema": {
+              "title": "App Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "env_name",
+            "required": true,
+            "schema": {
+              "title": "Env Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Configs Api V1 Apps  App Name  Environments  Env Name  Configs Put",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Configs",
+        "tags": [
+          "apps",
+          "configs"
+        ]
+      }
+    },
+    "/api/v1/apps/{app_name}/environments/{env_name}/configs/history": {
+      "get": {
+        "operationId": "config_history_api_v1_apps__app_name__environments__env_name__configs_history_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app_name",
+            "required": true,
+            "schema": {
+              "title": "App Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "env_name",
+            "required": true,
+            "schema": {
+              "title": "Env Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ConfigRevisionOut"
+                  },
+                  "title": "Response Config History Api V1 Apps  App Name  Environments  Env Name  Configs History Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Config History",
+        "tags": [
+          "apps",
+          "configs"
+        ]
+      }
+    },
+    "/api/v1/apps/{app_name}/environments/{env_name}/deploy": {
+      "post": {
+        "description": "Redeploy the environment's current branches (e.g. after a config-only change).",
+        "operationId": "deploy_now_api_v1_apps__app_name__environments__env_name__deploy_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app_name",
+            "required": true,
+            "schema": {
+              "title": "App Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "env_name",
+            "required": true,
+            "schema": {
+              "title": "Env Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeployIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeploymentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Deploy Now",
+        "tags": [
+          "deployments"
+        ]
+      }
+    },
+    "/api/v1/apps/{app_name}/environments/{env_name}/spec": {
+      "get": {
+        "description": "Everything a local agent needs to recreate this environment in Docker (no secret values).",
+        "operationId": "environment_spec_api_v1_apps__app_name__environments__env_name__spec_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app_name",
+            "required": true,
+            "schema": {
+              "title": "App Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "env_name",
+            "required": true,
+            "schema": {
+              "title": "Env Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvironmentSpec"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Environment Spec",
+        "tags": [
+          "apps",
+          "test-environments"
+        ]
+      }
+    },
+    "/api/v1/audit": {
+      "get": {
+        "operationId": "list_audit_api_v1_audit_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 1000,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "action",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Action"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AuditOut"
+                  },
+                  "title": "Response List Audit Api V1 Audit Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Audit",
+        "tags": [
+          "audit"
+        ]
+      }
+    },
+    "/api/v1/change-requests": {
+      "get": {
+        "operationId": "list_change_requests_api_v1_change_requests_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "app",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "App"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "mine",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Mine",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 500,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ChangeRequestView"
+                  },
+                  "title": "Response List Change Requests Api V1 Change Requests Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Change Requests",
+        "tags": [
+          "change-requests"
+        ]
+      },
+      "post": {
+        "description": "Called by a local agent after the developer pushed. Starts the server agent pipeline.",
+        "operationId": "create_change_request_api_v1_change_requests_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeployRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeRequestView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Change Request",
+        "tags": [
+          "change-requests"
+        ]
+      }
+    },
+    "/api/v1/change-requests/{cr_id}": {
+      "get": {
+        "operationId": "get_change_request_api_v1_change_requests__cr_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cr_id",
+            "required": true,
+            "schema": {
+              "title": "Cr Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeRequestView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Change Request",
+        "tags": [
+          "change-requests"
+        ]
+      }
+    },
+    "/api/v1/change-requests/{cr_id}/approve": {
+      "post": {
+        "operationId": "approve_api_v1_change_requests__cr_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cr_id",
+            "required": true,
+            "schema": {
+              "title": "Cr Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeRequestView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Approve",
+        "tags": [
+          "change-requests"
+        ]
+      }
+    },
+    "/api/v1/change-requests/{cr_id}/reject": {
+      "post": {
+        "operationId": "reject_api_v1_change_requests__cr_id__reject_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cr_id",
+            "required": true,
+            "schema": {
+              "title": "Cr Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeRequestView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reject",
+        "tags": [
+          "change-requests"
+        ]
+      }
+    },
+    "/api/v1/change-requests/{cr_id}/reports": {
+      "get": {
+        "operationId": "get_reports_api_v1_change_requests__cr_id__reports_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cr_id",
+            "required": true,
+            "schema": {
+              "title": "Cr Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Reports Api V1 Change Requests  Cr Id  Reports Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Reports",
+        "tags": [
+          "change-requests"
+        ]
+      }
+    },
+    "/api/v1/change-requests/{cr_id}/retry": {
+      "post": {
+        "operationId": "retry_api_v1_change_requests__cr_id__retry_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cr_id",
+            "required": true,
+            "schema": {
+              "title": "Cr Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeRequestView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Retry",
+        "tags": [
+          "change-requests"
+        ]
+      }
+    },
+    "/api/v1/deployments": {
+      "get": {
+        "operationId": "list_deployments_api_v1_deployments_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "app",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "App"
+            }
+          },
+          {
+            "in": "query",
+            "name": "environment",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Environment"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 500,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DeploymentOut"
+                  },
+                  "title": "Response List Deployments Api V1 Deployments Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Deployments",
+        "tags": [
+          "deployments"
+        ]
+      }
+    },
+    "/api/v1/deployments/{dep_id}": {
+      "get": {
+        "operationId": "get_deployment_api_v1_deployments__dep_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dep_id",
+            "required": true,
+            "schema": {
+              "title": "Dep Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeploymentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Deployment",
+        "tags": [
+          "deployments"
+        ]
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "operationId": "health_api_v1_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Health Api V1 Health Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/api/v1/llm/health": {
+      "get": {
+        "operationId": "llm_health_api_v1_llm_health_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "probe",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Probe",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Llm Health Api V1 Llm Health Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Llm Health",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/api/v1/me": {
+      "get": {
+        "operationId": "me_api_v1_me_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Me Api V1 Me Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Me",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/v1/peers": {
+      "get": {
+        "operationId": "list_requests_api_v1_peers_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PeerRequestView"
+                  },
+                  "title": "Response List Requests Api V1 Peers Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Requests",
+        "tags": [
+          "peers"
+        ]
+      },
+      "post": {
+        "operationId": "create_api_v1_peers_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PeerRequestCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PeerRequestView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create",
+        "tags": [
+          "peers"
+        ]
+      }
+    },
+    "/api/v1/peers/{pr_id}/artifact": {
+      "get": {
+        "operationId": "download_api_v1_peers__pr_id__artifact_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pr_id",
+            "required": true,
+            "schema": {
+              "title": "Pr Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Download",
+        "tags": [
+          "peers"
+        ]
+      },
+      "put": {
+        "operationId": "upload_api_v1_peers__pr_id__artifact_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pr_id",
+            "required": true,
+            "schema": {
+              "title": "Pr Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-head-sha",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Head-Sha"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PeerRequestView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upload",
+        "tags": [
+          "peers"
+        ]
+      }
+    },
+    "/api/v1/peers/{pr_id}/respond": {
+      "post": {
+        "operationId": "respond_api_v1_peers__pr_id__respond_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pr_id",
+            "required": true,
+            "schema": {
+              "title": "Pr Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "approve",
+            "required": true,
+            "schema": {
+              "title": "Approve",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PeerRequestView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Respond",
+        "tags": [
+          "peers"
+        ]
+      }
+    },
+    "/api/v1/users": {
+      "get": {
+        "operationId": "list_users_api_v1_users_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UserOut"
+                  },
+                  "title": "Response List Users Api V1 Users Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Users",
+        "tags": [
+          "users"
+        ]
+      },
+      "post": {
+        "operationId": "create_user_api_v1_users_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create User",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/v1/users/{username}/tokens": {
+      "post": {
+        "operationId": "create_token_api_v1_users__username__tokens_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "username",
+            "required": true,
+            "schema": {
+              "title": "Username",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Token",
+        "tags": [
+          "users"
+        ]
+      }
+    }
+  }
+}

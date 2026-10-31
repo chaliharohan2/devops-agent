@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: devops
+          POSTGRES_PASSWORD: devops
+          POSTGRES_DB: devops_agent_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U devops" --health-interval 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv python install 3.11
+      - run: uv sync --all-packages --python 3.11
+      - run: uv run ruff check .
+      - name: Tests (SQLite)
+        run: uv run pytest
+      - name: Tests (PostgreSQL)
+        env:
+          TEST_DATABASE_URL: postgresql+psycopg://devops:devops@127.0.0.1:5432/devops_agent_test
+        run: uv run pytest server/tests local_agent/tests
+      - name: Migrations apply cleanly
+        env:
+          DATABASE_URL: postgresql+psycopg://devops:devops@127.0.0.1:5432/devops_agent_test
+        run: |
+          uv run python -c "from devops_server import db, models; db.configure(); db.Base.metadata.drop_all(db.engine())"
+          uv run devops-server migrate
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run build

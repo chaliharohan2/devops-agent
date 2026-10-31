@@ -218,3 +218,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- devops-agent project specific ---
+node_modules/
+web/dist/
+.devops-agent/
+*.sqlite3
+*.db
+.ruff_cache/
+.pytest_cache/
+.demo/
+*.tsbuildinfo

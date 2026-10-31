@@ -1,0 +1,21 @@
+# Component manifest read by the DevOps Agent fleet (see docs/MANIFEST_SPEC.md)
+version: 1
+app: shop
+component:
+  name: frontend
+  kind: frontend
+  language: javascript
+  framework: react
+  port: 4173            # production preview server
+  dev:
+    command: npm run dev -- --host 0.0.0.0 --port 5173
+    port: 5173
+    mount: /app
+  healthcheck:
+    path: /
+  depends_on: [backend]
+  env:
+    VITE_API_URL:
+      description: Base URL of the shop backend, as seen from the browser
+      required: true
+      local: ${components.backend.external_url}
