@@ -123,3 +123,25 @@ def shop(server: Env) -> Env:
     )
     assert r.status_code == 201, r.text
     return server
+
+
+@pytest.fixture
+def vllm(shop: Env, monkeypatch: pytest.MonkeyPatch) -> Iterator:
+    """Point the server agent at a dummy vLLM served over real HTTP (auth, URL handling and all)."""
+    from devops_common.fake_vllm import FakeVLLM, start
+    from devops_server.services import llm_service
+    from devops_server.settings import get_settings
+
+    fake = FakeVLLM(api_key="test-vllm-key")
+    httpd, base_url = start(fake)
+    monkeypatch.setenv("VLLM_BASE_URL", base_url + "/chat/completions")  # full-endpoint form, as in the docs
+    monkeypatch.setenv("VLLM_API_KEY", "test-vllm-key")
+    monkeypatch.setenv("VLLM_MODEL", fake.model)
+    monkeypatch.setenv("DEVOPS_LLM_ENABLED", "true")
+    get_settings.cache_clear()
+    llm_service.get_client.cache_clear()
+    yield fake
+    httpd.shutdown()
+    httpd.server_close()
+    get_settings.cache_clear()
+    llm_service.get_client.cache_clear()

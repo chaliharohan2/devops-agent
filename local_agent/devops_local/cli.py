@@ -9,6 +9,7 @@ from pathlib import Path
 
 import typer
 from rich.console import Console
+from rich.markup import escape
 from rich.panel import Panel
 from rich.table import Table
 
@@ -43,7 +44,7 @@ def _split(target: str | None) -> tuple[str | None, str | None]:
 
 
 def _fail(msg: str) -> None:
-    console.print(f"[red]error:[/red] {msg}")
+    console.print(f"[red]error:[/red] {escape(msg)}")
     raise typer.Exit(1)
 
 
@@ -128,13 +129,13 @@ def analyze(target: str = typer.Argument(None, help="app/component (default: cur
 def _print_analysis(res: dict) -> None:
     pf = res["preflight"]
     for p in pf["problems"]:
-        console.print(f"[red]✗[/red] {p}")
+        console.print(f"[red]✗[/red] {escape(p)}")
     for w in pf["warnings"]:
-        console.print(f"[yellow]![/yellow] {w}")
+        console.print(f"[yellow]![/yellow] {escape(w)}")
     rep = res.get("report")
     if not rep:
         return
-    console.print(Panel(rep["summary"], title=f"{res['app']}/{res['component']}: {pf['branch']} -> {res['target_branch']}"))
+    console.print(Panel(escape(rep["summary"]), title=f"{res['app']}/{res['component']}: {pf['branch']} -> {res['target_branch']}"))
     if rep["config_changes"]:
         t = Table("change", "key", "evidence", "notes")
         for ch in rep["config_changes"]:
@@ -143,7 +144,7 @@ def _print_analysis(res: dict) -> None:
             t.add_row(ch["kind"], ch["key"] or "", ev, notes)
         console.print(t)
     for w in rep["warnings"]:
-        console.print(f"[yellow]![/yellow] {w}")
+        console.print(f"[yellow]![/yellow] {escape(w)}")
 
 
 @app.command()
@@ -193,15 +194,15 @@ def _follow(agent: LocalAgent, cr_id: int, timeout: float = 1800) -> None:
     while time.monotonic() < end:
         cr = agent.deploy_status(cr_id)[0]
         for t in cr.timeline[seen:]:
-            console.print(f"  {t.at:%H:%M:%S} [cyan]{t.status}[/cyan] {t.message}")
+            console.print(f"  {t.at:%H:%M:%S} [cyan]{t.status}[/cyan] {escape(t.message)}")
         seen = len(cr.timeline)
         if cr.status.terminal or cr.status.value == "awaiting_approval":
             if cr.review:
-                console.print(Panel(cr.review.summary + ("\n\nConcerns:\n- " + "\n- ".join(cr.review.concerns)
-                                                         if cr.review.concerns else ""),
+                console.print(Panel(escape(cr.review.summary + ("\n\nConcerns:\n- " + "\n- ".join(cr.review.concerns)
+                                                                if cr.review.concerns else "")),
                                     title=f"server review (risk {cr.risk_level}, {cr.review.source})"))
             if cr.error:
-                console.print(f"[red]{cr.error}[/red]")
+                console.print(f"[red]{escape(cr.error)}[/red]")
             return
         time.sleep(2)
 
@@ -237,8 +238,8 @@ def env_up(app_name: str = typer.Argument(..., metavar="APP"), env: str = typer.
     except (AgentError, ServerError) as e:
         _fail(str(e))
     color = "green" if st.status == "running" else "yellow" if st.status == "preparing" else "red"
-    console.print(f"[{color}]{st.name}: {st.status}[/{color}] {st.message}")
-    console.print(Panel(st.instructions, title="how to test"))
+    console.print(f"[{color}]{st.name}: {st.status}[/{color}] {escape(st.message or '')}")
+    console.print(Panel(escape(st.instructions), title="how to test"))
 
 
 @env_app.command("ls")
@@ -267,7 +268,7 @@ def env_logs(name: str, service: str = typer.Argument(None), tail: int = 200) ->
 @env_app.command("show")
 def env_show(name: str) -> None:
     st = _agent().envs.get(name)
-    console.print(Panel(st.instructions, title=f"{st.name} ({st.status})"))
+    console.print(Panel(escape(st.instructions), title=f"{st.name} ({st.status})"))
 
 
 # --------------------------------------------------------------------------- peers
@@ -361,7 +362,7 @@ def chat(message: str = typer.Argument(None)) -> None:
                 return
         res = brain.chat(msgs.pop(0), sid)
         sid = res["session_id"]
-        console.print(Panel(res["reply"], title=f"agent ({res.get('source', '')})"))
+        console.print(Panel(escape(res["reply"]), title=f"agent ({res.get('source', '')})"))
         if message and not res.get("pending") and sid not in brain.pending:
             return
 

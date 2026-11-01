@@ -20,10 +20,32 @@ uv run devops-server check-llm
 It prints the configuration, lists `/v1/models`, sends a "pong" probe (with latency), asks for a schema‑validated
 JSON review, and runs a one‑tool function‑calling round trip. The dashboard's Overview shows the same health.
 
-> **Status at hand‑off:** the endpoint at `103.48.50.161:8000` was **not reachable from the sandbox this project
-> was built in** (direct egress timed out; the sandbox proxy only allows HTTPS on port 443). All LLM code paths
-> are covered with an in‑process mock (`httpx.MockTransport`) in the tests, and the demo ran with the deterministic
-> fallback. Please run `check-llm` from a machine that can reach the endpoint.
+`check-llm` exits non‑zero with a specific message when the key is wrong, the model id is not served, or tool
+calling is not enabled on the vLLM server.
+
+> **Status:** the real endpoint at `103.48.50.161:8000` is **not reachable from the cloud sandbox** this project is
+> developed in. Every LLM code path has been exercised end‑to‑end over real HTTP against a dummy vLLM server (see
+> below), but please run `check-llm` from a machine that can reach the real endpoint before relying on it.
+
+## Test without a GPU: the dummy vLLM server
+
+[`devops_common/fake_vllm.py`](../packages/common/devops_common/fake_vllm.py) is a small, standard‑library‑only
+server that speaks vLLM's OpenAI‑compatible API: `/v1/models`, `/v1/chat/completions`, bearer‑token auth, guided
+JSON (`response_format: json_schema`), native tool calls, Qwen3 `<think>` blocks or `reasoning_content`, and
+vLLM's error responses (401, unknown model, tools without `--enable-auto-tool-choice`). Replies are deterministic
+and prefixed with `[fake-vllm]`. With `--log`, every request is written to a JSONL file, so you can check exactly
+what the server agent sent to the model (for example, that no secret values were sent).
+
+```bash
+uv run python -m devops_common.fake_vllm --port 8001 --api-key test-key --log /tmp/vllm-requests.jsonl
+export VLLM_BASE_URL=http://127.0.0.1:8001/v1 VLLM_API_KEY=test-key VLLM_MODEL=cyankiwi/Qwen3.8-27B-AWQ-INT4
+uv run devops-server check-llm      # or: scripts/demo.sh, the dashboard chat, ...
+```
+
+Flags: `--reasoning-parser` (reasoning in `reasoning_content`), `--no-auto-tool-choice` (reject tool requests like
+a server started without `--enable-auto-tool-choice`), `--review-risk low|medium|high` (force the review's risk, to
+see the policy floor win), `--model` (served model id). The server test suite runs the same server over HTTP in
+CI (`server/tests/test_pipeline.py`, tests named `*_over_http`).
 
 ### Recommended vLLM flags
 
@@ -39,8 +61,11 @@ vllm serve cyankiwi/Qwen3.8-27B-AWQ-INT4 \
   `qwen3_coder` for coder‑style templates).
 * `--reasoning-parser qwen3` moves `<think>` blocks into `reasoning_content` (the client strips them either way).
 
-* Without `--enable-auto-tool-choice`, the operator chat still works if the model emits `<tool_call>{…}</tool_call>`
-  text — `devops_common.llm` parses that format — but native tool calls are more reliable.
+* `--enable-auto-tool-choice` is **required** for the operator chat (and the `check-llm` tool test): without it,
+  vLLM rejects any request that includes tools with HTTP 400 (`"auto" tool choice requires
+  --enable-auto-tool-choice and --tool-call-parser to be set`). Reviews, conflict explanations and deployment
+  diagnoses don't send tools, so they still work. If a model writes tool calls as `<tool_call>{…}</tool_call>`
+  text instead of using the parser, `devops_common.llm` parses that format too.
 * Structured outputs use `response_format: {type: json_schema}` (vLLM guided decoding). If the server rejects it,
   the client retries without it and validates/repairs the JSON itself.
 

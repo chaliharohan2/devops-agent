@@ -11,6 +11,15 @@
 Run: `uv run pytest` (SQLite) and with `TEST_DATABASE_URL=postgresql+psycopg://…` (PostgreSQL). CI runs both,
 plus `ruff`, Alembic migrations and the web build (`.github/workflows/ci.yml`).
 
+The root `conftest.py` hides your global and system git config (`GIT_CONFIG_GLOBAL=/dev/null`,
+`GIT_CONFIG_NOSYSTEM=1`), so tests behave the same on your machine as on a fresh CI runner. A `user.name` in
+`~/.gitconfig` once hid a bug where server merges failed on hosts with no git identity.
+
+Server LLM paths are tested twice: in‑process with `httpx.MockTransport`, and over real HTTP against the dummy vLLM
+server (`devops_common.fake_vllm`; tests named `*_over_http`). The HTTP tests cover the LLM review and the policy
+floor, conflict explanations, operator chat tool calls, fallback when the LLM is unavailable, and that no secret
+value is ever sent to the model.
+
 ## End‑to‑end (real Docker)
 
 `scripts/demo.sh` was run end‑to‑end during development:

@@ -57,6 +57,7 @@ def create_user(username: str, role: str = typer.Option("developer", help="devel
 def check_llm() -> None:
     """Verify the vLLM endpoint: list models, chat, structured JSON and tool calling."""
     from devops_common.agentloop import Tool, run_tool_loop
+    from devops_common.llm import LLMError
     from devops_common.protocol import ReviewResult
 
     from .services import llm_service
@@ -70,22 +71,37 @@ def check_llm() -> None:
     client = llm_service.get_client()
     if client is None or not info.get("ok"):
         raise typer.Exit(1)
+    if info.get("model_available") is False:
+        typer.echo(f"FAIL: VLLM_MODEL {s.vllm_model!r} is not served by this endpoint; set it to one of "
+                   f"{info.get('models')}", err=True)
+        raise typer.Exit(1)
     t = time.monotonic()
-    review = client.chat_json(
-        llm_service.SYSTEM_PROMPT + "\n" + llm_service.REVIEW_PROMPT,
-        json.dumps({"app": "shop", "component": "backend", "environment": "staging",
-                    "config_changes": [{"kind": "env_var_added", "key": "PAYMENT_API_KEY", "secret": True}],
-                    "requires_migration": True}),
-        ReviewResult,
-    )
+    try:
+        review = client.chat_json(
+            llm_service.SYSTEM_PROMPT + "\n" + llm_service.REVIEW_PROMPT,
+            json.dumps({"app": "shop", "component": "backend", "environment": "staging",
+                        "config_changes": [{"kind": "env_var_added", "key": "PAYMENT_API_KEY", "secret": True}],
+                        "requires_migration": True}),
+            ReviewResult,
+        )
+    except LLMError as e:
+        typer.echo(f"FAIL: structured review: {e}", err=True)
+        raise typer.Exit(1) from e
     typer.echo(f"structured review ({time.monotonic() - t:.1f}s): {review.model_dump_json(indent=2)}")
-    run = run_tool_loop(
-        client, "You are a test agent. Use tools when helpful.",
-        [{"role": "user", "content": "What is 17 * 23? Use the multiply tool."}],
-        [Tool("multiply", "Multiply two integers", {"type": "object", "properties": {"a": {"type": "integer"},
-              "b": {"type": "integer"}}, "required": ["a", "b"]}, lambda a: int(a["a"]) * int(a["b"]))],
-        max_steps=3,
-    )
+    try:
+        run = run_tool_loop(
+            client, "You are a test agent. Use tools when helpful.",
+            [{"role": "user", "content": "What is 17 * 23? Use the multiply tool."}],
+            [Tool("multiply", "Multiply two integers", {"type": "object", "properties": {"a": {"type": "integer"},
+                  "b": {"type": "integer"}}, "required": ["a", "b"]}, lambda a: int(a["a"]) * int(a["b"]))],
+            max_steps=3,
+        )
+    except LLMError as e:
+        typer.echo(f"FAIL: tool calling: {e}", err=True)
+        if "auto-tool-choice" in str(e):
+            typer.echo("The operator chat needs native tool calls: start vLLM with "
+                       "--enable-auto-tool-choice --tool-call-parser <parser>.", err=True)
+        raise typer.Exit(1) from e
     used = [st.tool for st in run.steps]
     typer.echo(f"tool calling: tools used={used} final={run.final[:200]!r}")
     typer.echo("OK" if "multiply" in used else "WARNING: model did not call the tool "
