@@ -4,7 +4,14 @@ from pathlib import Path
 
 import pytest
 
-from devops_common.gitguard import GitPolicyError, MergeGit, ReadOnlyGit, WorkspaceGit
+from devops_common.gitguard import (
+    DEFAULT_MERGE_IDENTITY,
+    GitCommandError,
+    GitPolicyError,
+    MergeGit,
+    ReadOnlyGit,
+    WorkspaceGit,
+)
 from devops_common.testing import commit_and_push, git, init_remote
 
 
@@ -124,3 +131,46 @@ def test_merge_verified_reports_conflicts(tmp_path: Path) -> None:
     assert m.status_porcelain() == []
     m.sync()
     assert git(dev, "rev-parse", "origin/main") == m.rev_parse("origin/main")
+
+
+def _feature_ready_to_merge(tmp_path: Path) -> tuple[Path, str]:
+    remote, dev = init_remote(tmp_path, "svc", {"a.py": "a = 1\n", "b.py": "b = 1\n"})
+    sha = commit_and_push(dev, {"a.py": "a = 2\n"}, "change a", "feature/a")
+    git(dev, "checkout", "-q", "main")
+    commit_and_push(dev, {"b.py": "b = 2\n"}, "change b", "main")
+    return remote, sha
+
+
+def test_merge_commit_uses_explicit_identity_not_host_config(tmp_path: Path) -> None:
+    # The workspace conftest hides ~/.gitconfig, so this also proves merges work on
+    # hosts with no git user.name / user.email (e.g. CI runners).
+    remote, sha = _feature_ready_to_merge(tmp_path)
+    default = MergeGit(tmp_path / "server" / "default")
+    default.ensure_clone(str(remote))
+    default.sync()
+    res = default.merge_verified(sha, "main", "Merge feature/a")
+    assert res.ok
+    name, email = DEFAULT_MERGE_IDENTITY
+    assert default.out("log", "-1", "--format=%an <%ae>|%cn <%ce>", res.merge_sha) == f"{name} <{email}>|{name} <{email}>"
+
+    custom = MergeGit(tmp_path / "server" / "custom", identity=("Release Bot", "release-bot@example.com"))
+    custom.ensure_clone(str(remote))
+    custom.sync()
+    res = custom.merge_verified(sha, "main", "Merge feature/a")
+    assert res.ok
+    assert custom.out("log", "-1", "--format=%cn <%ce>", res.merge_sha) == "Release Bot <release-bot@example.com>"
+
+
+def test_merge_failure_without_conflicts_raises_instead_of_reporting_conflict(tmp_path: Path) -> None:
+    remote, sha = _feature_ready_to_merge(tmp_path)
+    m = MergeGit(tmp_path / "server" / "svc", identity=("", ""))  # git refuses an empty ident
+    m.ensure_clone(str(remote))
+    m.sync()
+    before = m.rev_parse("origin/main")
+    with pytest.raises(GitCommandError, match="ident"):
+        m.merge_verified(sha, "main", "Merge feature/a")
+    # workspace restored, nothing pushed
+    assert m.status_porcelain() == []
+    assert m.rev_parse("HEAD") == before
+    m.sync()
+    assert m.rev_parse("origin/main") == before

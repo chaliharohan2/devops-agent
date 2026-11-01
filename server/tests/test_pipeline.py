@@ -76,6 +76,8 @@ def test_full_pipeline_merges_configures_and_deploys(shop) -> None:
     assert main == cr["merge_sha"]
     parents = git(shop.dev_clone, "rev-list", "--parents", "-n", "1", main).split()[1:]
     assert parents[1] == cr["head_sha"]
+    # merge commit is made under the server agent's configured identity
+    assert git(shop.dev_clone, "log", "-1", "--format=%cn <%ce>", main) == "DevOps Server Agent <devops-agent@localhost>"
 
     # config store updated, secret masked everywhere
     cfg = {e["key"]: e for e in c.get("/api/v1/apps/shop/environments/dev/configs", headers=dev).json()}
@@ -251,3 +253,20 @@ def test_retry_after_conflict_fixed(shop) -> None:
     git(shop.dev_clone, "push", "-q", "origin", "feature/r")
     cr2 = c.post("/api/v1/change-requests", json=deploy_request(shop, "feature/r", "dev"), headers=dev).json()
     assert c.get(f"/api/v1/change-requests/{cr2['id']}", headers=dev).json()["status"] == "deployed"
+
+
+def test_merge_error_is_reported_as_failure_not_conflict(shop, monkeypatch) -> None:
+    """A merge that fails for a non-conflict reason must not tell the developer to resolve conflicts."""
+    from devops_server.settings import get_settings
+
+    monkeypatch.setenv("DEVOPS_GIT_MERGE_NAME", "")  # git refuses to create a commit with an empty ident
+    get_settings.cache_clear()
+    c = shop.client
+    dev = shop.user("alice")
+    commit_and_push(shop.dev_clone, {"app/new.py": "X = 1\n"}, "new module", "feature/ident")
+    cr = c.post("/api/v1/change-requests", json=deploy_request(shop, "feature/ident", "dev"), headers=dev).json()
+    cr = c.get(f"/api/v1/change-requests/{cr['id']}", headers=dev).json()
+    assert cr["status"] == "failed", cr
+    assert "ident" in cr["error"] and "conflict" not in cr["error"].lower()
+    assert cr["merge_sha"] is None
+

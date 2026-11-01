@@ -45,6 +45,10 @@ class Settings(BaseSettings):
     data_dir: Path = Path("./.devops-agent/server")
     sync_jobs: bool = False  # run pipelines inline (tests / debugging)
     git_sync_ttl_s: float = 20.0
+    # Identity for the merge commits the server agent creates. Set explicitly so merges
+    # work on hosts without a git user.name / user.email (CI runners, fresh VMs).
+    git_merge_name: str = "DevOps Server Agent"
+    git_merge_email: str = "devops-agent@localhost"
 
     # --- deployments -----------------------------------------------------------
     default_deploy_target: str = "compose"  # compose | dry_run

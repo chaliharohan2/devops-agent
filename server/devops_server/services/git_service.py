@@ -36,11 +36,12 @@ def lock_for(url: str) -> threading.RLock:
 
 def synced_merge_git(url: str, *, force: bool = False) -> MergeGit:
     """Clone if needed and fetch (rate limited by ``git_sync_ttl_s`` unless ``force``)."""
-    mg = MergeGit(repo_dir(url))
+    s = get_settings()
+    mg = MergeGit(repo_dir(url), identity=(s.git_merge_name, s.git_merge_email))
     with lock_for(url):
         mg.ensure_clone(url)
         now = time.monotonic()
-        if force or now - _last_sync.get(url, 0) > get_settings().git_sync_ttl_s:
+        if force or now - _last_sync.get(url, 0) > s.git_sync_ttl_s:
             mg.sync()
             _last_sync[url] = now
     return mg
