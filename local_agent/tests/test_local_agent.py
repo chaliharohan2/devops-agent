@@ -302,3 +302,24 @@ def test_already_merged_branch_is_nothing_to_deploy(world) -> None:
     assert any("Nothing to deploy" in p for p in res["preflight"]["problems"])
     with pytest.raises(AgentError, match="Nothing to deploy"):
         agent.deploy("shop", "backend", "dev")
+
+
+def test_cli_prints_untrusted_text_literally(monkeypatch) -> None:
+    """LLM/server text must not be parsed as Rich markup ("[/etc/app]" used to raise MarkupError)."""
+    import io
+
+    from rich.console import Console
+
+    from devops_local import cli
+
+    out = io.StringIO()
+    monkeypatch.setattr(cli, "console", Console(file=out, width=200, color_system=None))
+    cli._print_analysis({
+        "app": "shop", "component": "backend", "target_branch": "main",
+        "preflight": {"branch": "feature/x", "problems": ["[/etc/app] is dirty"], "warnings": ["[bold]w[/bold]"]},
+        "report": {"summary": "Rollback: [/etc/app] config is reverted", "config_changes": [],
+                   "warnings": ["[backend 2/5] RUN pip install"]},
+    })
+    text = out.getvalue()
+    for literal in ("[/etc/app] is dirty", "[bold]w[/bold]", "Rollback: [/etc/app] config", "[backend 2/5] RUN"):
+        assert literal in text

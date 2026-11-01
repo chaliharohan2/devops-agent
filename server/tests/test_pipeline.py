@@ -76,6 +76,8 @@ def test_full_pipeline_merges_configures_and_deploys(shop) -> None:
     assert main == cr["merge_sha"]
     parents = git(shop.dev_clone, "rev-list", "--parents", "-n", "1", main).split()[1:]
     assert parents[1] == cr["head_sha"]
+    # merge commit is made under the server agent's configured identity
+    assert git(shop.dev_clone, "log", "-1", "--format=%cn <%ce>", main) == "DevOps Server Agent <devops-agent@localhost>"
 
     # config store updated, secret masked everywhere
     cfg = {e["key"]: e for e in c.get("/api/v1/apps/shop/environments/dev/configs", headers=dev).json()}
@@ -251,3 +253,106 @@ def test_retry_after_conflict_fixed(shop) -> None:
     git(shop.dev_clone, "push", "-q", "origin", "feature/r")
     cr2 = c.post("/api/v1/change-requests", json=deploy_request(shop, "feature/r", "dev"), headers=dev).json()
     assert c.get(f"/api/v1/change-requests/{cr2['id']}", headers=dev).json()["status"] == "deployed"
+
+
+def test_merge_error_is_reported_as_failure_not_conflict(shop, monkeypatch) -> None:
+    """A merge that fails for a non-conflict reason must not tell the developer to resolve conflicts."""
+    from devops_server.settings import get_settings
+
+    monkeypatch.setenv("DEVOPS_GIT_MERGE_NAME", "")  # git refuses to create a commit with an empty ident
+    get_settings.cache_clear()
+    c = shop.client
+    dev = shop.user("alice")
+    commit_and_push(shop.dev_clone, {"app/new.py": "X = 1\n"}, "new module", "feature/ident")
+    cr = c.post("/api/v1/change-requests", json=deploy_request(shop, "feature/ident", "dev"), headers=dev).json()
+    cr = c.get(f"/api/v1/change-requests/{cr['id']}", headers=dev).json()
+    assert cr["status"] == "failed", cr
+    assert "ident" in cr["error"] and "conflict" not in cr["error"].lower()
+    assert cr["merge_sha"] is None
+
+
+# --------------------------------------------------------------------------- #
+# Server LLM over real HTTP (dummy vLLM: devops_common.fake_vllm)
+# --------------------------------------------------------------------------- #
+
+
+def _llm_payloads(fake) -> str:
+    return json.dumps([r["request"] for r in fake.chat_requests()])
+
+
+def test_vllm_reviews_change_over_http_and_never_sees_secrets(vllm, shop) -> None:
+    c = shop.client
+    dev = shop.user("alice")
+    commit_and_push(shop.dev_clone, FEATURE, "payments", "feature/payments")
+    cr = c.post("/api/v1/change-requests", json=deploy_request(shop, "feature/payments", "dev", PAYMENT_VALUES),
+                headers=dev).json()
+    cr = c.get(f"/api/v1/change-requests/{cr['id']}", headers=dev).json()
+    assert cr["status"] == "deployed", cr
+    assert cr["review"]["source"] == "llm"
+    assert cr["review"]["summary"].startswith("[fake-vllm]")
+    assert "Run database migrations" in cr["review"]["deployment_steps"]
+    reviews = [r for r in vllm.chat_requests() if r["kind"] == "json_schema"]
+    assert len(reviews) == 1
+    req = reviews[0]["request"]
+    assert req["model"] == vllm.model and req["response_format"]["type"] == "json_schema"
+    assert req["chat_template_kwargs"] == {"enable_thinking": False}  # thinking off for structured calls
+    assert "PAYMENT_API_KEY" in _llm_payloads(vllm)  # keys are facts the model may see ...
+    assert "sk_test_123" not in _llm_payloads(vllm)  # ... secret values never are
+
+
+def test_vllm_cannot_lower_policy_risk_over_http(vllm, shop) -> None:
+    vllm.review_risk = "low"
+    c = shop.client
+    dev = shop.user("alice")
+    commit_and_push(shop.dev_clone, FEATURE, "payments", "feature/payments")
+    cr = c.post("/api/v1/change-requests", json=deploy_request(shop, "feature/payments", "prod", PAYMENT_VALUES),
+                headers=dev).json()
+    cr = c.get(f"/api/v1/change-requests/{cr['id']}", headers=dev).json()
+    assert cr["review"]["source"] == "llm"
+    assert cr["risk_level"] == cr["review"]["risk_level"] == "high"  # the model said "low"; the policy floor wins
+    assert cr["status"] == "awaiting_approval"  # the model never approves
+
+
+def test_vllm_explains_conflicts_over_http(vllm, shop) -> None:
+    c = shop.client
+    dev = shop.user("alice")
+    commit_and_push(shop.dev_clone, {"app/main.py": "# feature version\n"}, "feature edit", "feature/conflict")
+    report = local_report(shop, "feature/conflict")
+    git(shop.dev_clone, "checkout", "-q", "main")
+    commit_and_push(shop.dev_clone, {"app/main.py": "# main version\n"}, "main edit", "main")
+    cr = c.post("/api/v1/change-requests", json=deploy_request(shop, "feature/conflict", "dev", report=report),
+                headers=dev).json()
+    cr = c.get(f"/api/v1/change-requests/{cr['id']}", headers=dev).json()
+    assert cr["status"] == "conflict"
+    assert cr["error"].startswith("[fake-vllm]") and "app/main.py" in cr["error"]
+    assert "git merge origin/main" in cr["error"]
+
+
+def test_operator_chat_calls_read_only_tools_over_http(vllm, shop) -> None:
+    c = shop.client
+    lead = shop.user("lead", "maintainer")
+    c.put("/api/v1/apps/shop/environments/dev/configs", headers=lead, json={"values": [
+        {"key": "API_TOKEN", "value": "super-secret-value", "is_secret": True},
+        {"key": "LOG_LEVEL", "value": "debug"},
+    ]})
+    r = c.post("/api/v1/agent/chat", headers=lead, json={"messages": [
+        {"role": "user", "content": "Which config keys does app shop have in environment dev?"}]})
+    assert r.status_code == 200, r.text
+    out = r.json()
+    assert out["steps"] == [{"tool": "list_config_keys", "arguments": {"app": "shop", "environment": "dev"},
+                             "error": None}]
+    assert "API_TOKEN" in out["reply"] and "LOG_LEVEL" in out["reply"]
+    assert "super-secret-value" not in _llm_payloads(vllm)
+
+
+def test_llm_outage_falls_back_to_deterministic_review(vllm, shop) -> None:
+    vllm.api_key = "rotated-key"  # every LLM call now gets 401
+    c = shop.client
+    dev = shop.user("alice")
+    commit_and_push(shop.dev_clone, FEATURE, "payments", "feature/payments")
+    cr = c.post("/api/v1/change-requests", json=deploy_request(shop, "feature/payments", "dev", PAYMENT_VALUES),
+                headers=dev).json()
+    cr = c.get(f"/api/v1/change-requests/{cr['id']}", headers=dev).json()
+    assert cr["status"] == "deployed"  # pipelines never block on the LLM
+    assert cr["review"]["source"] == "deterministic"
+    assert any("LLM review unavailable" in x and "401" in x for x in cr["review"]["concerns"])

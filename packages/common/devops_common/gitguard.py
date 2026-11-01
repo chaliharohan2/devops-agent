@@ -126,6 +126,9 @@ class _GuardedGit:
     def __init__(self, repo: Path | str):
         self.repo = Path(repo)
 
+    def _env(self) -> dict[str, str]:
+        return _git_env()
+
     # -- policy -------------------------------------------------------------
     def check(self, args: list[str]) -> None:
         if not args:
@@ -175,7 +178,7 @@ class _GuardedGit:
             cwd=str(cwd or self.repo),
             capture_output=True,
             text=True,
-            env=_git_env(),
+            env=self._env(),
             timeout=timeout,
         )
         if check and proc.returncode != 0:
@@ -186,7 +189,7 @@ class _GuardedGit:
         argv = list(args)
         self.check(argv)
         cmd = ["git", "-c", "core.fsmonitor=false", "-c", "core.hooksPath=/dev/null", *argv]
-        proc = subprocess.run(cmd, cwd=str(self.repo), capture_output=True, env=_git_env(), timeout=timeout)
+        proc = subprocess.run(cmd, cwd=str(self.repo), capture_output=True, env=self._env(), timeout=timeout)
         if proc.returncode != 0:
             raise GitCommandError(argv, proc.returncode, "", proc.stderr.decode(errors="replace"))
         return proc.stdout
@@ -303,11 +306,30 @@ class MergeResult:
     already_merged: bool = False
 
 
+DEFAULT_MERGE_IDENTITY = ("DevOps Server Agent", "devops-agent@localhost")
+
+
 class MergeGit(_GuardedGit):
-    """Server agent's git capability: merge pushed commits, never author code."""
+    """Server agent's git capability: merge pushed commits, never author code.
+
+    Merge commits are made under an explicit ``identity`` (name, email) passed via
+    ``GIT_AUTHOR_*`` / ``GIT_COMMITTER_*``, so merges never depend on whatever
+    ``user.name`` / ``user.email`` the host happens to have configured.
+    """
 
     capability = "merge-only"
     allowed = {**_READ_ONLY_SUBCOMMANDS, **_MERGE_EXTRA}
+
+    def __init__(self, repo: Path | str, identity: tuple[str, str] = DEFAULT_MERGE_IDENTITY):
+        super().__init__(repo)
+        self.identity = identity
+
+    def _env(self) -> dict[str, str]:
+        env = super()._env()
+        name, email = self.identity
+        env.update({"GIT_AUTHOR_NAME": name, "GIT_AUTHOR_EMAIL": email,
+                    "GIT_COMMITTER_NAME": name, "GIT_COMMITTER_EMAIL": email})
+        return env
 
     def check(self, args: list[str]) -> None:
         super().check(args)
@@ -342,7 +364,9 @@ class MergeGit(_GuardedGit):
         Verification proves the server agent introduced no code of its own: the
         set of paths changed by the merge (relative to the old target tip) must be
         a subset of the paths the developer's branch changed (relative to the
-        merge base). Conflicts are never resolved automatically.
+        merge base). Conflicts are never resolved automatically. A merge that fails
+        for any other reason (e.g. git cannot create the commit) raises
+        :class:`GitCommandError` instead of being reported as a conflict.
         """
         target_ref = f"refs/remotes/origin/{target_branch}"
         target_before = self.rev_parse(target_ref)
@@ -354,7 +378,8 @@ class MergeGit(_GuardedGit):
         self.run("clean", "-fdx", "-q")
         if self.status_porcelain():
             raise GitPolicyError("merge workspace is not clean; refusing to merge")
-        r = self.run("merge", "--no-ff", "--no-edit", "-m", message, source_sha, check=False)
+        merge_args = ["merge", "--no-ff", "--no-edit", "-m", message, source_sha]
+        r = self.run(*merge_args, check=False)
         if r.returncode != 0:
             conflicts = [
                 ln.split("\t", 1)[-1] if "\t" in ln else ln[3:]
@@ -363,6 +388,8 @@ class MergeGit(_GuardedGit):
             ]
             self.run("merge", "--abort", check=False)
             self.run("reset", "--hard", "--quiet", target_ref)
+            if not conflicts:
+                raise GitCommandError(merge_args, r.returncode, r.stdout, r.stderr)
             return MergeResult(ok=False, target_before=target_before, conflict_files=conflicts,
                                message=(r.stdout + r.stderr).strip()[:2000])
         merge_sha = self.rev_parse("HEAD")

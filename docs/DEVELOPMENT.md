@@ -26,7 +26,7 @@ docker run -d --name devops-pg -e POSTGRES_USER=devops -e POSTGRES_PASSWORD=devo
 export DATABASE_URL=postgresql+psycopg://devops:devops@127.0.0.1:5432/devops_agent
 export DEVOPS_SECRET_KEY=$(uv run python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())")
 export DEVOPS_BOOTSTRAP_ADMIN_TOKEN=dxa_local_admin
-export VLLM_BASE_URL=... VLLM_API_KEY=... VLLM_MODEL=...      # optional
+export VLLM_BASE_URL=... VLLM_API_KEY=... VLLM_MODEL=...      # optional; no GPU? see "dummy vLLM" in SERVER_LLM.md
 uv run devops-server migrate
 uv run devops-server serve --reload                          # http://127.0.0.1:8080 (dashboard + /docs)
 uv run devops-server create-user alice --role developer      # prints a token
@@ -34,7 +34,9 @@ uv run devops-server check-llm                               # verify vLLM
 ```
 
 All server settings: [`server/devops_server/settings.py`](../server/devops_server/settings.py)
-(prefix `DEVOPS_`, plus `DATABASE_URL` and `VLLM_*`).
+(prefix `DEVOPS_`, plus `DATABASE_URL` and `VLLM_*`). Merge commits are made as
+`DEVOPS_GIT_MERGE_NAME` / `DEVOPS_GIT_MERGE_EMAIL` (default `DevOps Server Agent <devops-agent@localhost>`), so the
+host doesn't need a git `user.name` / `user.email`.
 
 Register an app (or use the dashboard / `scripts/demo.sh`):
 
@@ -109,7 +111,8 @@ scripts/demo.sh down
 ## Code map
 
 ```
-packages/common/devops_common/   protocol.py manifest.py gitguard.py analysis.py compose.py llm.py agentloop.py testing.py
+packages/common/devops_common/   protocol.py manifest.py gitguard.py analysis.py compose.py llm.py agentloop.py
+                                 testing.py fake_vllm.py (test helpers)
 server/devops_server/            main.py settings.py db.py models.py security.py schemas.py cli.py
   api/                           routes_admin.py routes_apps.py routes_changes.py routes_peers.py routes_chat.py deps.py
   services/                      orchestrator.py policy.py config_store.py deployer.py env_spec.py git_service.py

@@ -10,8 +10,7 @@ import os
 import subprocess
 from pathlib import Path
 
-_ENV = {
-    **os.environ,
+_DEV_IDENTITY = {
     "GIT_AUTHOR_NAME": "Dev Eloper",
     "GIT_AUTHOR_EMAIL": "dev@example.com",
     "GIT_COMMITTER_NAME": "Dev Eloper",
@@ -20,8 +19,13 @@ _ENV = {
 }
 
 
+def _env() -> dict[str, str]:
+    # Built per call (not at import) so environment set up by test fixtures applies.
+    return {**os.environ, **_DEV_IDENTITY}
+
+
 def git(cwd: Path | str, *args: str) -> str:
-    proc = subprocess.run(["git", *args], cwd=str(cwd), capture_output=True, text=True, env=_ENV)
+    proc = subprocess.run(["git", *args], cwd=str(cwd), capture_output=True, text=True, env=_env())
     if proc.returncode != 0:
         raise RuntimeError(f"git {' '.join(args)} failed: {proc.stderr}")
     return proc.stdout.strip()
@@ -58,7 +62,7 @@ def commit_and_push(repo: Path, files: dict[str, str], message: str, branch: str
     current = git(repo, "branch", "--show-current")
     if current != branch:
         exists = subprocess.run(["git", "rev-parse", "--verify", "--quiet", branch], cwd=repo,
-                                capture_output=True).returncode == 0
+                                capture_output=True, env=_env()).returncode == 0
         git(repo, "checkout", "-q", *([] if exists else ["-b"]), branch)
     write_files(repo, files)
     for rel in delete or []:
